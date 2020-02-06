@@ -121,9 +121,8 @@ install-domserver-l:
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_logdir)
 	-$(INSTALL_USER)    -m 0700 -d $(DESTDIR)$(domserver_rundir)
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_submitdir)
-	-for d in cache log ; do \
-		$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/$$d ; \
-	done
+	-$(INSTALL_WEBSITE) -m 0775 -d $(DESTDIR)$(domserver_webappdir)/var/log
+
 # Special case create tmpdir here, only when FHS not enabled:
 ifneq "$(FHS_ENABLED)" "yes"
 	-$(INSTALL_WEBSITE) -m 0770 -d $(DESTDIR)$(domserver_tmpdir)
@@ -135,6 +134,7 @@ endif
 		etc/initial_admin_password.secret
 	-$(INSTALL_WEBSITE) -m 0640 -t $(DESTDIR)$(domserver_etcdir) \
 		etc/dbpasswords.secret etc/symfony_app.secret
+	$(DESTDIR)$(domserver_webappdir)/bin/console cache:warmup
 	@echo ""
 	@echo "Domserver install complete. Admin web interface password can be found in:"
 	@echo "$(DESTDIR)$(domserver_etcdir)/initial_admin_password.secret"
@@ -241,13 +241,13 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 	@echo "Or you can run these commands manually as root"
 	@echo "    - Give the webserver access to things it needs"
 	@echo "        setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret"
-	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var/log"
+	@echo "        setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var/log"
+	@echo "        setfacl -R -m d:m::rwx          $(CURDIR)/webapp/var/log"
+	@echo "        setfacl -R -m   m::rwx          $(CURDIR)/webapp/var/log"
 	@echo "        # Also make sure you keep access"
-	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
-	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var"
+	@echo "        setfacl -R -m d:u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var/log"
+	@echo "        setfacl -R -m   u:$(DOMJUDGE_USER):rwx  $(CURDIR)/webapp/var/log"
 	@echo "    - Configure webserver"
 	@echo "        Apache 2:"
 	@echo "           ln -sf $(CURDIR)/etc/apache.conf /etc/apache2/conf-enabled/domjudge.conf"
@@ -263,12 +263,12 @@ maintainer-install: build domserver-create-dirs judgehost-create-dirs webapp/.en
 
 maintainer-postinstall-permissions:
 	setfacl    -m   u:$(WEBSERVER_GROUP):r    $(CURDIR)/etc/dbpasswords.secret
-	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
-	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var
-	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
-	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var
-	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var
-	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var
+	setfacl -R -m d:u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var/log
+	setfacl -R -m   u:$(WEBSERVER_GROUP):rwx  $(CURDIR)/webapp/var/log
+	setfacl -R -m d:u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var/log
+	setfacl -R -m   u:$(DOMJUDGE_USER):rwx    $(CURDIR)/webapp/var/log
+	setfacl -R -m d:m::rwx                    $(CURDIR)/webapp/var/log
+	setfacl -R -m   m::rwx                    $(CURDIR)/webapp/var/log
 
 maintainer-postinstall-apache: maintainer-postinstall-permissions
 	@if [ ! -d "/etc/apache2/conf-enabled" ]; then echo "Couldn't find directory /etc/apache2/conf-enabled. Is apache installed?"; false; fi
