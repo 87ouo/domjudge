@@ -34,7 +34,7 @@ software on the DOMjudge server as mentioned above when using Debian
 GNU/Linux, or one of its derivative distributions like Ubuntu::
 
   sudo apt install zip unzip mariadb-server apache2 \
-        php php-fpm php-cli \
+        php php-fpm php-cli php-apcu \
         php-gd php-curl php-mysql php-json php-xml php-intl php-mbstring \
         php-zip composer ntp
 
@@ -43,7 +43,7 @@ distributions like CentOS and Fedora::
 
   sudo yum install zip unzip mariadb-server httpd \
         php-gd php-cli php-intl php-mbstring php-mysqlnd \
-        php-xml php-zip composer ntp
+        php-xml php-zip php-pecl-apcu composer ntp
 
 Installation
 ------------
