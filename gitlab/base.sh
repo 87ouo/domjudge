@@ -46,6 +46,7 @@ parameters:
 EOF
 
 # install all php dependencies
+sudo apt install php-apcu
 export APP_ENV="prod"
 composer install --no-scripts
 composer run-script package-versions-dump
